@@ -17,7 +17,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-<#include "macro-head.ftl">
 <div class="solo-mood">
     111111111111
     ${test}

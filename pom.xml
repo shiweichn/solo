@@ -432,6 +432,7 @@
                     <stopPort>4501</stopPort>
                     <webAppConfig>
                         <contextPath>/</contextPath>
+                        <defaultsDescriptor>jettyCustom.xml</defaultsDescriptor>
                     </webAppConfig>
                     <scanIntervalSeconds>1</scanIntervalSeconds>
                 </configuration>
