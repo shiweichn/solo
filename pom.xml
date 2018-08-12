@@ -402,6 +402,7 @@
                         <param>plugin.js</param>
                         <param>main.js</param>
                         <param>about.js</param>
+                        <param>mood.js</param>
                     </adminJSs>
 
                     <cssSourceDir>src/main/webapp/css</cssSourceDir>

@@ -135,7 +135,12 @@
                                 <div id="tabs_others">
                                     <a href="#tools/others">${othersLabel}</a>
                                 </div>
-                            </li>  
+                            </li>
+                            <li>
+                                <div id="tabs_moods">
+                                    <a href="#tools/moods">${moodLabel}</a>
+                                </div>
+                            </li>
                         </ul>
                     </li>
                     <li>
@@ -158,6 +163,7 @@
                 <div id="tabsPanel_category-list" class="none"></div>
                 <div id="tabsPanel_page-list" class="none"></div>
                 <div id="tabsPanel_others" class="none"></div>
+                <div id="tabsPanel_moods" class="none"></div>
                 <div id="tabsPanel_user-list" class="none"></div>
                 <div id="tabsPanel_comment-list" class="none"></div>
                 <div id="tabsPanel_plugin-list" class="none"></div>
@@ -194,6 +200,7 @@
         <script src="${staticServePath}/js/admin/plugin.js"></script>
         <script src="${staticServePath}/js/admin/main.js"></script>
         <script src="${staticServePath}/js/admin/about.js"></script>
+        <script src="${staticServePath}/js/admin/mood.js"></script>
         <#else>
         <script src="${staticServePath}/js/admin/latkeAdmin${miniPostfix}.js?${staticResourceVersion}"></script>
         </#if>

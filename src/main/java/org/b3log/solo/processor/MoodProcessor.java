@@ -21,12 +21,14 @@ import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.ioc.inject.Inject;
 import org.b3log.latke.logging.Logger;
+import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
 import org.b3log.latke.servlet.renderer.DoNothingRenderer;
+import org.b3log.latke.servlet.renderer.JSONRenderer;
 import org.b3log.latke.servlet.renderer.freemarker.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Strings;
 import org.b3log.solo.SoloServletListener;
@@ -34,6 +36,7 @@ import org.b3log.solo.model.Common;
 import org.b3log.solo.model.Mood;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.model.Skin;
+import org.b3log.solo.processor.renderer.ConsoleRenderer;
 import org.b3log.solo.processor.renderer.SkinRenderer;
 import org.b3log.solo.processor.util.Filler;
 import org.b3log.solo.service.MoodService;
@@ -47,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @RequestProcessor
@@ -71,6 +75,12 @@ public class MoodProcessor {
      */
     @Inject
     private PreferenceQueryService preferenceQueryService;
+
+    /**
+     * Language service.
+     */
+    @Inject
+    private LangPropsService langPropsService;
 
     @RequestProcessing(value = "/plugins/checkMood.do", method = HTTPRequestMethod.GET)
     public void checkMood(final HTTPRequestContext context) {
@@ -116,5 +126,30 @@ public class MoodProcessor {
 
     private boolean isInternalLinks(String destinationURL) {
         return destinationURL.startsWith(Latkes.getServePath());
+    }
+
+    @RequestProcessing(value = "/admin-moods.do", method = HTTPRequestMethod.GET)
+    public void showMoodsManager(final HTTPRequestContext context) {
+        final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
+        context.setRenderer(renderer);
+        renderer.setTemplateName("admin-mood.ftl");
+
+        final Locale locale = Latkes.getLocale();
+        final Map<String, String> langs = langPropsService.getAll(locale);
+        final Map<String, Object> dataModel = renderer.getDataModel();
+
+        dataModel.putAll(langs);
+        Keys.fillRuntime(dataModel);
+        dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
+    }
+
+    @RequestProcessing(value = "/test.do", method = HTTPRequestMethod.GET)
+    public void test(final HTTPRequestContext context) {
+        JSONRenderer renderer = new JSONRenderer();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Keys.STATUS_CODE, true);
+        renderer.setJSONObject(jsonObject);
+        renderer.render(context);
+        context.setRenderer(renderer);
     }
 }

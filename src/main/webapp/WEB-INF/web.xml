@@ -65,6 +65,7 @@
         <url-pattern>/admin-user-list.do</url-pattern>
         <url-pattern>/admin-plugin-list.do</url-pattern>
         <url-pattern>/admin-about.do</url-pattern>
+        <url-pattern>/admin-mood.do</url-pattern>
         <url-pattern>/fix/*</url-pattern>
     </filter-mapping>
     <filter>

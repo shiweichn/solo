@@ -17,4 +17,4 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-<script src="${staticServePath}/plugins/mood/assert/mood.js"></script>
+<#--<script src="${staticServePath}/plugins/mood/assert/mood.js"></script>-->
