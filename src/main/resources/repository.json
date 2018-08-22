@@ -593,6 +593,35 @@
                     "legnth": 20
                 }
             ]
+        },
+        {
+            "name": "mood",
+            "description": "Mood table",
+            "keys": [
+                {
+                    "name": "oId",
+                    "description": "主键",
+                    "type": "String",
+                    "length": 64
+                },
+                {
+                    "name": "author",
+                    "description": "author",
+                    "type": "String",
+                    "length": 64
+                },
+                {
+                    "name": "moodContent",
+                    "description": "moodContent",
+                    "type": "String",
+                    "legnth": 10240
+                },
+                {
+                    "name": "createTime",
+                    "description": "createTime",
+                    "type": "Date"
+                }
+            ]
         }
     ]
 }

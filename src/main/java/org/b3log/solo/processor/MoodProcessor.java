@@ -31,15 +31,13 @@ import org.b3log.latke.servlet.renderer.DoNothingRenderer;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
 import org.b3log.latke.servlet.renderer.freemarker.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Strings;
-import org.b3log.solo.SoloServletListener;
 import org.b3log.solo.model.Common;
-import org.b3log.solo.model.Mood;
 import org.b3log.solo.model.Option;
-import org.b3log.solo.model.Skin;
 import org.b3log.solo.processor.renderer.ConsoleRenderer;
 import org.b3log.solo.processor.renderer.SkinRenderer;
 import org.b3log.solo.processor.util.Filler;
-import org.b3log.solo.service.MoodService;
+import org.b3log.solo.service.MoodMgmtService;
+import org.b3log.solo.service.MoodQueryService;
 import org.b3log.solo.service.PreferenceQueryService;
 import org.b3log.solo.util.Skins;
 import org.json.JSONException;
@@ -48,7 +46,6 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -56,100 +53,106 @@ import java.util.Map;
 @RequestProcessor
 public class MoodProcessor {
 
-    /**
-     * Logger.
-     */
-    private static final Logger logger = Logger.getLogger(MoodProcessor.class);
-    /**
-     * Option management service.
-     */
-    @Inject
-    private MoodService moodService;
-    /**
-     * Filler.
-     */
-    @Inject
-    private Filler filler;
-    /**
-     * Preference query service.
-     */
-    @Inject
-    private PreferenceQueryService preferenceQueryService;
+	/**
+	 * Logger.
+	 */
+	private static final Logger logger = Logger.getLogger(MoodProcessor.class);
+	/**
+	 * Option management service.
+	 */
+	@Inject
+	private MoodQueryService moodQueryService;
 
-    /**
-     * Language service.
-     */
-    @Inject
-    private LangPropsService langPropsService;
+	@Inject
+	private MoodMgmtService moodMgmtService;
+	/**
+	 * Filler.
+	 */
+	@Inject
+	private Filler filler;
+	/**
+	 * Preference query service.
+	 */
+	@Inject
+	private PreferenceQueryService preferenceQueryService;
 
-    @RequestProcessing(value = "/plugins/checkMood.do", method = HTTPRequestMethod.GET)
-    public void checkMood(final HTTPRequestContext context) {
-        DoNothingRenderer nothingRenderer = new DoNothingRenderer();
-        nothingRenderer.render(context);
-        context.setRenderer(nothingRenderer);
-    }
+	/**
+	 * Language service.
+	 */
+	@Inject
+	private LangPropsService langPropsService;
 
-    @RequestProcessing(value = "/mood/showMood.do", method = HTTPRequestMethod.GET)
-    public void showMood(final HTTPRequestContext context) throws IOException, JSONException, ServiceException {
-        final HttpServletRequest request = context.getRequest();
-        final HttpServletResponse response = context.getResponse();
+	@RequestProcessing(value = "/plugins/checkMood.do", method = HTTPRequestMethod.GET)
+	public void checkMood(final HTTPRequestContext context) {
+		DoNothingRenderer nothingRenderer = new DoNothingRenderer();
+		nothingRenderer.render(context);
+		context.setRenderer(nothingRenderer);
+	}
 
-        String destinationURL = request.getParameter(Common.GOTO);
-        if (Strings.isEmptyOrNull(destinationURL)) {
-            destinationURL = Latkes.getServePath() + Common.ADMIN_INDEX_URI;
-        } else if (!isInternalLinks(destinationURL)) {
-            destinationURL = "/";
-        }
+	@RequestProcessing(value = "/mood/showMood.do", method = HTTPRequestMethod.GET)
+	public void showMood(final HTTPRequestContext context) throws IOException, JSONException, ServiceException {
+		final HttpServletRequest request = context.getRequest();
+		final HttpServletResponse response = context.getResponse();
 
-        renderPage(context, "mood.ftl", destinationURL, request);
-    }
+		String destinationURL = request.getParameter(Common.GOTO);
+		if (Strings.isEmptyOrNull(destinationURL)) {
+			destinationURL = Latkes.getServePath() + Common.ADMIN_INDEX_URI;
+		} else if (!isInternalLinks(destinationURL)) {
+			destinationURL = "/";
+		}
 
-    private void renderPage(final HTTPRequestContext context, final String pageTemplate, final String destinationURL,
-                            final HttpServletRequest request) throws JSONException, ServiceException {
-        JSONObject preference = preferenceQueryService.getPreference();
-        final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest());
-        renderer.setTemplateName(pageTemplate);
-        Map<String, Object> dataModel = renderer.getDataModel();
-        List<Mood> moods = moodService.getAll();
-        dataModel.put("moods", moods);
-        dataModel.put("test", "testValue");
+		renderPage(context, "mood.ftl", destinationURL, request);
+	}
 
-        filler.fillMinified(dataModel);
-        Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-        filler.fillSide(request, dataModel, preference);
-        filler.fillBlogHeader(request, context.getResponse(), dataModel, preference);
-        filler.fillBlogFooter(request, dataModel, preference);
-        Keys.fillRuntime(dataModel);
-        renderer.render(context);
-        context.setRenderer(renderer);
-    }
+	private void renderPage(final HTTPRequestContext context, final String pageTemplate, final String destinationURL,
+	                        final HttpServletRequest request) throws JSONException, ServiceException {
+		JSONObject preference = preferenceQueryService.getPreference();
+		final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest());
+		renderer.setTemplateName(pageTemplate);
+		Map<String, Object> dataModel = renderer.getDataModel();
+		List<JSONObject> moods = moodQueryService.getMoods();
+		dataModel.put("moods", moods);
+		logger.debug(moods.toString());
+		filler.fillMinified(dataModel);
+		Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+		filler.fillSide(request, dataModel, preference);
+		filler.fillBlogHeader(request, context.getResponse(), dataModel, preference);
+		filler.fillBlogFooter(request, dataModel, preference);
+		Keys.fillRuntime(dataModel);
+		renderer.render(context);
+		context.setRenderer(renderer);
+	}
 
-    private boolean isInternalLinks(String destinationURL) {
-        return destinationURL.startsWith(Latkes.getServePath());
-    }
+	private boolean isInternalLinks(String destinationURL) {
+		return destinationURL.startsWith(Latkes.getServePath());
+	}
 
-    @RequestProcessing(value = "/admin-moods.do", method = HTTPRequestMethod.GET)
-    public void showMoodsManager(final HTTPRequestContext context) {
-        final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
-        context.setRenderer(renderer);
-        renderer.setTemplateName("admin-mood.ftl");
+	@RequestProcessing(value = "/admin-moods.do", method = HTTPRequestMethod.GET)
+	public void showMoodsManager(final HTTPRequestContext context) {
+		final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
+		context.setRenderer(renderer);
+		renderer.setTemplateName("admin-mood.ftl");
 
-        final Locale locale = Latkes.getLocale();
-        final Map<String, String> langs = langPropsService.getAll(locale);
-        final Map<String, Object> dataModel = renderer.getDataModel();
+		final Locale locale = Latkes.getLocale();
+		final Map<String, String> langs = langPropsService.getAll(locale);
+		final Map<String, Object> dataModel = renderer.getDataModel();
 
-        dataModel.putAll(langs);
-        Keys.fillRuntime(dataModel);
-        dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
-    }
+		dataModel.putAll(langs);
+		Keys.fillRuntime(dataModel);
+		dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
+	}
 
-    @RequestProcessing(value = "/test.do", method = HTTPRequestMethod.GET)
-    public void test(final HTTPRequestContext context) {
-        JSONRenderer renderer = new JSONRenderer();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Keys.STATUS_CODE, true);
-        renderer.setJSONObject(jsonObject);
-        renderer.render(context);
-        context.setRenderer(renderer);
-    }
+	@RequestProcessing(value = "/test.do", method = HTTPRequestMethod.GET)
+	public void test(final HTTPRequestContext context) throws ServiceException {
+		JSONRenderer renderer = new JSONRenderer();
+		JSONObject jsonObject = new JSONObject();
+
+
+		moodMgmtService.addUser(null);
+
+		jsonObject.put(Keys.STATUS_CODE, true);
+		renderer.setJSONObject(jsonObject);
+		renderer.render(context);
+		context.setRenderer(renderer);
+	}
 }
