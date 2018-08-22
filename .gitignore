@@ -15,6 +15,7 @@
 src/main/webapp/skins/*
 !src/main/webapp/skins/mobile
 !src/main/webapp/skins/Medium
+!src/main/webapp/skins/NeoEase
 
 src/main/webapp/markdowns/*
 !src/main/webapp/markdowns/README.md
