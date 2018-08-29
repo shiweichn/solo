@@ -25,7 +25,10 @@
 
 /* mood 相关操作 */
 admin.moods = {
-    init: function () {
+    currentEditorType: '',
+    init: function (fun) {
+        this.currentEditorType = Label.editorType;
+
         $.ajax({
             url: latkeConfig.servePath + "/test.do",
             type: "GET",
@@ -36,22 +39,52 @@ admin.moods = {
                     $("#loadMsg").text("");
                     return;
                 }
-
                 $("#loadMsg").text("");
+
+                // admin.editors.moodEditor.init()
             }
         });
         console.log('mood page')
+        // editor
+        admin.editors.moodEditor = new SoloEditor({
+            id: "moodContent",
+            kind: "all",
+            height: 500
+        });
+        $('#submitMood').click(function () {
+            var mood = admin.editors.moodEditor.getContent()
+            var requestJSONObject = {
+                'mood': {
+                    'moodContent': mood
+                }
+            }
+            if (mood.trim().length < 1) {
+                console.log('未填写内容，不可发布！')
+            } else {
+                $.ajax({
+                    url: latkeConfig.servePath + "/mood/addMood.do",
+                    type: "POST",
+                    cache: false,
+                    data: JSON.stringify(requestJSONObject),
+                    success: function (result, textStatus) {
+                        if (result.sc) {
+                            $("#loadMsg").text("说说发布成功！");
+                        }
+                        admin.editors.moodEditor.setContent("")
+                    }
+                })
+            }
+        });
     }
 };
 
 /*
  * 注册到 admin 进行管理
  */
-admin.register["moods"]= {
+admin.register["moods"] = {
     "obj": admin.moods,
     "init": admin.moods.init,
     "refresh": function () {
         admin.clearTip();
     }
 };
-411525200609083044

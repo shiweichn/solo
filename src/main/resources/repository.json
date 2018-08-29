@@ -605,16 +605,16 @@
                     "length": 64
                 },
                 {
-                    "name": "author",
-                    "description": "author",
+                    "name": "userEmail",
+                    "description": "外键-用户邮箱",
                     "type": "String",
-                    "length": 64
+                    "length":32
                 },
                 {
                     "name": "moodContent",
                     "description": "moodContent",
                     "type": "String",
-                    "legnth": 10240
+                    "length": 10240
                 },
                 {
                     "name": "createTime",
